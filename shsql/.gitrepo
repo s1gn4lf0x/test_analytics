@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github-signalfox:SignalFoxAnalytics/shsql.git
+	branch = master
+	commit = 383dcfa8d50d205c2cdbad02ce9a79963a21957a
+	parent = none
+	cmdver = 0.3.1
