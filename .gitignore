@@ -1,0 +1,34 @@
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.idea
+
+### Webpack/Generated ###
+webpack-stats-dev.json
+node_modules/
+dev/
+
+### Testing ###
+coverage/
+
+# Django stuff
+static/
+templates/
+settings_email.py
+
+# Node
+npm-debug.log
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# FB Testing Files
+test_*.json
+**/management/commands/test_*.py
+
+# Local files
+local_db.json
+**/qunit/signalfox.js
