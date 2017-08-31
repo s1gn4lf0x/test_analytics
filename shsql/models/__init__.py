@@ -3,3 +3,4 @@ from .user import UserProfile
 from .fb import FacebookApp
 from .fb import FacebookAdAccount
 from .fb import FacebookAccountDailyRawReport
+from .reports import ReportConfig
