@@ -4,6 +4,7 @@ from facebookads.adobjects.campaign import Campaign
 from fernet_fields import EncryptedCharField
 
 from .user import Company
+from .reports import ReportConfig
 
 class FacebookApp(models.Model):
     """The Facebook app auth information
@@ -47,24 +48,26 @@ class FacebookAdAccount(models.Model):
     class Meta:
         unique_together = ('account_id', 'app')
 
-class FacebookAccountDailyRawReport(models.Model):
-    """The Facebook app auth information
-    needed for running ads through the marketing API.
-    Each client would typically only need one 'app'
-    to run ads with.
+class FacebookRawReport(models.Model):
+    """The Facebook raw report data
     """
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
-        related_name='fbdailyrawreports'
+        related_name='fbrawreports'
     )
     account = models.ForeignKey(
         FacebookAdAccount,
         on_delete=models.CASCADE,
-        related_name='fbdailyrawreports'
+        related_name='fbrawreports'
+    )
+    config = models.ForeignKey(
+        ReportConfig,
+        on_delete=models.PROTECT,
+        related_name='fbrawreports'
     )
     report_date = models.DateTimeField()
     data = JSONField()
 
     class Meta:
-        unique_together = ('company', 'account', 'report_date')
+        unique_together = ('company', 'account', 'report_date', 'config')
