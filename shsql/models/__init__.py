@@ -3,6 +3,7 @@ from .user import UserProfile
 from .fb import FacebookApp
 from .fb import FacebookAdAccount
 from .fb import FacebookRawReport
+from .fb import FacebookDashboardReport
 from .reports import ReportConfig
 from .reports import DashboardConfig
 from .reports import ChartConfig
