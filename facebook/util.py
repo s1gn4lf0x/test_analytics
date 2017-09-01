@@ -2,6 +2,10 @@ import os
 import boto3
 import json
 
+from datetime import datetime, timedelta
+from delorean import Delorean
+from django.utils import timezone
+
 from util.fernet import FernetHelper
 from util.row import Row
 from shsql.models import FacebookAdAccount
@@ -10,6 +14,10 @@ from shsql.models import DashboardConfig
 
 
 # ------- Shared helper functions (non-task functions) ------- #
+
+def create_report_date(offset):
+    local_date = timezone.localtime() - timedelta(days=offset)
+    return Delorean(local_date).truncate('day').datetime
 
 def fetch_active_accounts():
     return FacebookAdAccount.objects.filter(is_active__exact=True)

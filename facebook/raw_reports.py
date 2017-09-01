@@ -2,33 +2,17 @@ import os
 import boto3
 import json
 
-from datetime import datetime, timedelta
-from delorean import Delorean
 from django.db import IntegrityError, transaction
 from facebookads.api import FacebookAdsApi
 from facebookads.adobjects.adaccount import AdAccount
 
-from celery import shared_task
-
 from shsql.models import FacebookRawReport
 
-from .util import fetch_active_accounts
 from .util import result_key
 from .util import report_config
+from .util import create_report_date
 from .report_manager import ReportManager
 
-@shared_task
-def facebook_raw_reports(level, platform, breakdown, period):
-    """ Task to fetch daily raw facebook ad reports.
-    Pull all active ad accounts from the web DB and fetch raw facebook
-    reports for them. Store the raw report data in DynamoDB for later
-    processing.
-    """
-    active_accounts = fetch_active_accounts()
-    # For each active ad account generate the appropriate fb reports and store
-    # TODO: batch this job
-    result = facebook_raw_reports_batch(active_accounts, level, platform, breakdown, period)
-    return { 'fb_raw_report_{}_{}_d{}'.format(level, breakdown, period): result }
 
 def facebook_raw_reports_batch(accounts, level, platform, breakdown, period, day=1):
     """Create a batch of daily raw reports"""
@@ -52,7 +36,8 @@ def facebook_raw_reports_batch(accounts, level, platform, breakdown, period, day
                     acc.app.company,
                     period
                 )
-                report_date = (Delorean() - timedelta(days=day)).truncate('day').datetime
+                report_date = create_report_date(day)
+                print(report_date)
                 report_date_str = report_date.strftime('%Y-%m-%d')
                 setup.config['params']['time_range'] = {
                     'since': report_date_str,
@@ -76,9 +61,24 @@ def facebook_raw_reports_batch(accounts, level, platform, breakdown, period, day
         result.append({'error': str(e)})
     return result
 
-def facebook_backdate_raw_reports_batch(accounts, level, platform, breakdown, period, days=14, offset=1):
+def facebook_backdate_raw_reports_batch(
+    accounts,
+    level,
+    platform,
+    breakdown,
+    period,
+    days=14,
+    offset=1
+):
     """Create a batch of backdated daily raw reports"""
     result = []
     for d in range(offset,days+offset):
-        result.append(facebook_raw_reports_batch(accounts, level, platform, breakdown, period, d))
+        result.append(facebook_raw_reports_batch(
+            accounts,
+            level,
+            platform,
+            breakdown,
+            period,
+            d
+        ))
     return result

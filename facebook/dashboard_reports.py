@@ -3,65 +3,32 @@ import boto3
 import json
 import operator
 
-from datetime import datetime, timedelta
-from delorean import Delorean
 from facebookads.api import FacebookAdsApi
 from facebookads.adobjects.adaccount import AdAccount
 
-from celery import shared_task
 from shsql.models import DashboardConfig
 from shsql.models import FacebookRawReport
 from shsql.models import FacebookDashboardReport
 
-from .util import fetch_active_accounts
 from .util import result_key
 from .util import dashboard_config
 from .util import report_config
+from .util import create_report_date
 from .report_manager import ReportManager
 
-@shared_task
-def facebook_dashboard_reports(level, platform, breakdown, period):
-    """ Task to test creation of daily UA dashboard reports.
-    Create dashboard facebook reports for the test client accounts.
-    Store the result in DynamoDB for web access.
-    """
-    accounts = fetch_active_accounts()
-    # For each test ad account generate the appropriate fb reports and store
-    result = facebook_dashboard_reports_batch(
-        accounts,
-        level,
-        platform,
-        breakdown,
-        period
-    )
-    return { 'fb_dash_report_{}_{}_d{}'.format(level, breakdown, period): result }
-
-@shared_task
-def backdate_facebook_dashboard_reports(level, platform, breakdown, period, days, offset):
-    """ Task to test creation of daily UA dashboard reports.
-    Create dashboard facebook reports for the test client accounts.
-    Store the result in DynamoDB for web access.
-    """
-    accounts = fetch_active_accounts()
-    # For each test ad account generate the appropriate fb reports and store
-    result = facebook_backdate_dashboard_reports_batch(
-        accounts,
-        level,
-        platform,
-        breakdown,
-        period,
-        days,
-        offset
-    )
-    return { 'test_daily_dashboard_reports_'+report: result }
-
-
-def facebook_dashboard_reports_batch(accounts, level, platform, breakdown, period, day=1):
+def facebook_dashboard_reports_batch(
+    accounts,
+    level,
+    platform,
+    breakdown,
+    period,
+    day=1
+):
     """Create a batch of daily dashboard reports"""
     result = []
     for acc in accounts:
         # Get the last daily reports from dynamoDB
-        raw_report_date = (Delorean() - timedelta(days=day)).truncate('day').datetime
+        raw_report_date = create_report_date(day)
         setup = report_config(
             level,
             platform,
@@ -126,9 +93,24 @@ def facebook_dashboard_reports_batch(accounts, level, platform, breakdown, perio
             result.append({acc.account_id: -1})
     return result
 
-def facebook_backdate_dashboard_reports_batch(accounts, report_desc, days, offset=1):
+def facebook_backdate_dashboard_reports_batch(
+    accounts,
+    level,
+    platform,
+    breakdown,
+    period,
+    days,
+    offset=1
+):
     """Create a batch of backdated daily dashboard reports"""
     result = []
     for d in range(offset,days+offset):
-        result.append(facebook_daily_dashboard_reports_batch(accounts, report_desc, d))
+        result.append(facebook_dashboard_reports_batch(
+            accounts,
+            level,
+            platform,
+            breakdown,
+            period,
+            d
+        ))
     return result

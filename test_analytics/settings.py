@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'util',
     'shsql.apps.ShSQLConfig',
     'facebook.apps.FacebookConfig',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -129,14 +128,10 @@ CELERY_BROKER_URL = 'amqp://nadia:N4a9R8a8DuTtXcn3@localhost:5672//sfdata'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
 
-from celery.schedules import crontab
-CELERY_BEAT_SCHEDULE = {
-    # 'api-data-to-s3': {
-    #     'task': 'api.tasks.transfer_to_s3',
-    #     'schedule': crontab(minute='*/2'),
-    # }
-}
+from .celery_schedule import configure_celery_tasks
+CELERY_BEAT_SCHEDULE = configure_celery_tasks()
 
 
 # Internationalization
@@ -144,7 +139,7 @@ CELERY_BEAT_SCHEDULE = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'US/Eastern'
 
 USE_I18N = True
 

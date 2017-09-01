@@ -15,8 +15,8 @@ from shsql.models import FacebookDashboardReport
 from shsql.management.data.dashboard_configs import dashboard_configs
 from shsql.management.data.report_configs import facebook_report_configs
 
-from .raw_reports import facebook_raw_reports
-from .dashboard_reports import facebook_dashboard_reports
+from .tasks import facebook_raw_reports
+from .tasks import facebook_dashboard_reports
 
 class RawReportsTest(TestCase):
     def setUp(self):
@@ -93,6 +93,7 @@ class RawReportsTest(TestCase):
         self.assertTrue(len(reports) > 0)
         # The reports config should match the input
         for r in reports:
+            print(r.report_date)
             self.assertEqual(r.config.platform, 'web')
             self.assertEqual(r.config.level, 'account')
             self.assertEqual(r.company.id, self.company.id)
