@@ -6,13 +6,17 @@ from django.test import TestCase
 
 from shsql.models import Company
 from shsql.models import ReportConfig
+from shsql.models import DashboardConfig
 from shsql.models import FacebookApp
 from shsql.models import FacebookAdAccount
 from shsql.models import FacebookRawReport
+from shsql.models import FacebookDashboardReport
 
+from shsql.management.data.dashboard_configs import dashboard_configs
 from shsql.management.data.report_configs import facebook_report_configs
 
-from .raw_reports import facebook_daily_raw_reports
+from .raw_reports import facebook_raw_reports
+from .dashboard_reports import facebook_dashboard_reports
 
 class RawReportsTest(TestCase):
     def setUp(self):
@@ -28,6 +32,19 @@ class RawReportsTest(TestCase):
                 kwargs['company'] = Company.get(id=config['company'])
 
             (report, created) = ReportConfig.objects.update_or_create(
+                defaults = config,
+                **kwargs
+            )
+
+        for config in dashboard_configs:
+            kwargs = {
+                'platform': config['platform'],
+                'dashboard': config['dashboard'],
+            }
+            if config['company']:
+                kwargs['company'] = Company.get(id=config['company'])
+
+            DashboardConfig.objects.update_or_create(
                 defaults = config,
                 **kwargs
             )
@@ -64,10 +81,13 @@ class RawReportsTest(TestCase):
                         is_active = True
                     )
 
+        # Make a set of raw reports available to all tests
+        facebook_raw_reports('account', 'web', '', 1)
+        facebook_raw_reports('account', 'web', 'geo', 1)
+        facebook_raw_reports('account', 'web', 'region', 1)
 
     def test_facebook_daily_raw_reports(self):
         """We can pull and store facebook daily raw reports"""
-        facebook_daily_raw_reports('account', 'web', '', 1)
         # There should now be reports in the DB
         reports = FacebookRawReport.objects.all()
         self.assertTrue(len(reports) > 0)
@@ -79,7 +99,6 @@ class RawReportsTest(TestCase):
 
     def test_facebook_daily_geo_raw_reports(self):
         """We can pull and store facebook daily raw reports"""
-        facebook_daily_raw_reports('account', 'web', 'geo', 1)
         # There should now be reports in the DB
         reports = FacebookRawReport.objects.all()
         self.assertTrue(len(reports) > 0)
@@ -94,7 +113,6 @@ class RawReportsTest(TestCase):
 
     def test_facebook_daily_region_raw_reports(self):
         """We can pull and store facebook daily raw reports"""
-        facebook_daily_raw_reports('account', 'web', 'region', 1)
         # There should now be reports in the DB
         reports = FacebookRawReport.objects.all()
         self.assertTrue(len(reports) > 0)
@@ -106,3 +124,42 @@ class RawReportsTest(TestCase):
             self.assertEqual(r.company.id, self.company.id)
             self.assertTrue(len(r.data) > 0)
             self.assertTrue('region' in r.data[0])
+
+    def test_facebook_daily_dashboard_reports(self):
+        """We can pull and store facebook daily raw reports"""
+        # There should now be reports in the DB
+        facebook_dashboard_reports('account', 'web', '', 1)
+
+        reports = FacebookDashboardReport.objects.all()
+        self.assertTrue(len(reports) > 0)
+
+        for r in reports:
+            self.assertEqual(r.raw_report.config.platform, 'web')
+            self.assertTrue('spend' in r.data)
+            self.assertTrue('labels' in r.data)
+
+    def test_facebook_daily_geo_dashboard_reports(self):
+        """We can pull and store facebook daily raw reports"""
+        # There should now be reports in the DB
+        facebook_dashboard_reports('account', 'web', 'geo', 1)
+
+        reports = FacebookDashboardReport.objects.all()
+        self.assertTrue(len(reports) > 0)
+
+        for r in reports:
+            self.assertEqual(r.raw_report.config.platform, 'web')
+            self.assertTrue('spend' in r.data)
+            self.assertTrue('labels' in r.data)
+
+    def test_facebook_daily_region_dashboard_reports(self):
+        """We can pull and store facebook daily raw reports"""
+        # There should now be reports in the DB
+        facebook_dashboard_reports('account', 'web', 'region', 1)
+
+        reports = FacebookDashboardReport.objects.all()
+        self.assertTrue(len(reports) > 0)
+
+        for r in reports:
+            self.assertEqual(r.raw_report.config.platform, 'web')
+            self.assertTrue('spend' in r.data)
+            self.assertTrue('labels' in r.data)

@@ -6,6 +6,7 @@ from util.fernet import FernetHelper
 from util.row import Row
 from shsql.models import FacebookAdAccount
 from shsql.models import ReportConfig
+from shsql.models import DashboardConfig
 
 
 # ------- Shared helper functions (non-task functions) ------- #
@@ -34,19 +35,35 @@ def report_config(level, platform, breakdown, company, period):
     If there is no company specific config, use the generic one.
     """
 
-    if ReportConfig.objects.filter(
+    report_config = ReportConfig.objects.filter(
+        level=level,
+        platform=platform.lower(),
+        breakdown=breakdown,
+        company=company,
+        period=period
+    )
+    if report_config.exists():
+        return report_config.get()
+    else:
+        return ReportConfig.objects.filter(
             level=level,
             platform=platform.lower(),
             breakdown=breakdown,
-            company=company,
+            company=None,
             period=period
-        ).exists():
-        return report_config
+        ).get()
+
+def dashboard_config(company, platform, dashboard):
+    dash_config = DashboardConfig.objects.filter(
+        company=company,
+        platform=platform.lower(),
+        dashboard=dashboard
+    )
+    if dash_config.exists():
+        return dash_config.get()
     else:
-        return ReportConfig.objects.filter(
-                level=level,
-                platform=platform.lower(),
-                breakdown=breakdown,
-                company=None,
-                period=period
-            ).get()
+        return DashboardConfig.objects.filter(
+            company=None,
+            platform=platform.lower(),
+            dashboard=dashboard
+        ).get()

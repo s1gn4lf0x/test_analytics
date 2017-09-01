@@ -18,7 +18,7 @@ from .util import report_config
 from .report_manager import ReportManager
 
 @shared_task
-def facebook_daily_raw_reports(level, platform, breakdown, period):
+def facebook_raw_reports(level, platform, breakdown, period):
     """ Task to fetch daily raw facebook ad reports.
     Pull all active ad accounts from the web DB and fetch raw facebook
     reports for them. Store the raw report data in DynamoDB for later
@@ -27,10 +27,10 @@ def facebook_daily_raw_reports(level, platform, breakdown, period):
     active_accounts = fetch_active_accounts()
     # For each active ad account generate the appropriate fb reports and store
     # TODO: batch this job
-    result = facebook_daily_raw_reports_batch(active_accounts, level, platform, breakdown, period)
+    result = facebook_raw_reports_batch(active_accounts, level, platform, breakdown, period)
     return { 'fb_raw_report_{}_{}_d{}'.format(level, breakdown, period): result }
 
-def facebook_daily_raw_reports_batch(accounts, level, platform, breakdown, period, day=1):
+def facebook_raw_reports_batch(accounts, level, platform, breakdown, period, day=1):
     """Create a batch of daily raw reports"""
     result = []
     try:
@@ -76,9 +76,9 @@ def facebook_daily_raw_reports_batch(accounts, level, platform, breakdown, perio
         result.append({'error': str(e)})
     return result
 
-def facebook_backdate_daily_raw_reports_batch(accounts, level, platform, breakdown, period, days=14, offset=1):
+def facebook_backdate_raw_reports_batch(accounts, level, platform, breakdown, period, days=14, offset=1):
     """Create a batch of backdated daily raw reports"""
     result = []
     for d in range(offset,days+offset):
-        result.append(facebook_daily_raw_reports_batch(accounts, level, platform, breakdown, period, d))
+        result.append(facebook_raw_reports_batch(accounts, level, platform, breakdown, period, d))
     return result
