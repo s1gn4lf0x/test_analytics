@@ -71,3 +71,29 @@ class FacebookRawReport(models.Model):
 
     class Meta:
         unique_together = ('company', 'account', 'report_date', 'config')
+
+class FacebookDashboardReport(models.Model):
+    """The Facebook dashboard report data.
+    Data taken from the raw report and configured for use
+    on the dashboard including the addition of derived fields etc.
+    """
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='fbreports'
+    )
+    account = models.ForeignKey(
+        FacebookAdAccount,
+        on_delete=models.CASCADE,
+        related_name='fbreports'
+    )
+    raw_report = models.ForeignKey(
+        FacebookRawReport,
+        on_delete=models.PROTECT,
+        related_name='fbreports'
+    )
+    report_date = models.DateTimeField()
+    data = JSONField()
+
+    class Meta:
+        unique_together = ('company', 'account', 'report_date', 'raw_report')
