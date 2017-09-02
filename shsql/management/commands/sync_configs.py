@@ -6,38 +6,50 @@ from django.core.management.base import BaseCommand
 from shsql.models import Company
 from shsql.models import ReportConfig
 from shsql.models import DashboardConfig
+from shsql.models import ChartConfig
+from shsql.models import TableConfig
 from shsql.management.data.report_configs import facebook_report_configs
 from shsql.management.data.dashboard_configs import dashboard_configs
+from shsql.management.data.chart_configs import chart_configs
+from shsql.management.data.table_configs import table_configs
+
+def kwargs_from_fields(config, fields):
+    return {f: config[f] for f in fields}
+
+def update_configs(configs, fields, m):
+    for config in configs:
+        all_fields = fields if not config['company'] else fields + ['company']
+        kwargs = kwargs_from_fields(config, all_fields)
+        m.objects.update_or_create(
+            defaults = config,
+            **kwargs
+        )
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Loop through the report configs and insert them into
         # the DB ... create OR update
-        for config in facebook_report_configs:
-            kwargs = {
-                'platform': config['platform'],
-                'level': config['level'],
-                'period': config['period'],
-                'breakdown': config['breakdown']
-            }
-            if config['company']:
-                kwargs['company'] = Company.get(id=config['company'])
+        update_configs(
+            facebook_report_configs,
+            ['platform', 'level', 'period', 'breakdown'],
+            ReportConfig
+        )
 
-            ReportConfig.objects.update_or_create(
-                defaults = config,
-                **kwargs
-            )
+        update_configs(
+            dashboard_configs,
+            ['platform', 'dashboard'],
+            DashboardConfig
+        )
 
-        for config in dashboard_configs:
-            kwargs = {
-                'platform': config['platform'],
-                'dashboard': config['dashboard'],
-            }
-            if config['company']:
-                kwargs['company'] = Company.get(id=config['company'])
+        update_configs(
+            chart_configs,
+            ['field', 'dashboard'],
+            ChartConfig
+        )
 
-            DashboardConfig.objects.update_or_create(
-                defaults = config,
-                **kwargs
-            )
+        update_configs(
+            table_configs,
+            ['name', 'dashboard'],
+            TableConfig
+        )

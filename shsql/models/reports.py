@@ -40,18 +40,30 @@ class DashboardConfig(models.Model):
 
 class ChartConfig(models.Model):
     """The chart configs table"""
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='chartconfigs',
+        null=True
+    )
     field = models.CharField(max_length=128)
     dashboard = models.CharField(max_length=128)
     config = JSONField()
 
     class Meta:
-        unique_together = ('field', 'dashboard')
+        unique_together = ('company', 'field', 'dashboard')
 
 class TableConfig(models.Model):
     """The table configs table"""
-    table = models.CharField(max_length=128)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='tableconfigs',
+        null=True
+    )
+    name = models.CharField(max_length=128)
     dashboard = models.CharField(max_length=128)
     config = JSONField()
 
     class Meta:
-        unique_together = ('table', 'dashboard')
+        unique_together = ('company', 'name', 'dashboard')
