@@ -4,6 +4,9 @@ from .fb import FacebookApp
 from .fb import FacebookAdAccount
 from .fb import FacebookRawReport
 from .fb import FacebookDashboardReport
+from .fb import FacebookAdSetConfig
+from .fb import FacebookImage
+from .fb import FacebookImageCreative
 from .reports import ReportConfig
 from .reports import DashboardConfig
 from .reports import ChartConfig

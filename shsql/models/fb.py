@@ -97,3 +97,57 @@ class FacebookDashboardReport(models.Model):
 
     class Meta:
         unique_together = ('company', 'account', 'report_date', 'raw_report')
+
+class FacebookAdSetConfig(models.Model):
+    """The AdSet definition table"""
+
+    company = models.ForeignKey(
+        Company,
+        null=True,
+        on_delete=models.CASCADE
+    )
+    platform = models.CharField(max_length=128)
+    objective = models.CharField(max_length=128)
+    optimization_goal = models.CharField(max_length=128)
+    billing_event = models.CharField(max_length=128)
+    geo = models.CharField(max_length=128)
+    bid_amount = models.DecimalField(max_digits=7, decimal_places=2)
+    optional_config = JSONField()
+
+    class Meta:
+        unique_together = ('company', 'platform', 'objective', 'geo')
+
+class FacebookImageCreative(models.Model):
+    """Image creative storage by Company"""
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE
+    )
+    date_created = models.DateTimeField(auto_now_add=True)
+    image_hash = models.CharField(max_length=256)
+    name = models.CharField(max_length=256)
+    title = models.CharField(max_length=256)
+    body = models.CharField(max_length=512)
+    url = models.URLField(max_length=256)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('company', 'date_created', 'name')
+
+class FacebookImage(models.Model):
+    """Image storage by Company"""
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE
+    )
+    image_hash = models.CharField(max_length=256)
+    permalink_url = models.URLField(max_length=256)
+    created_time = models.DateTimeField()
+    accounts = models.ManyToManyField(
+        FacebookAdAccount,
+        related_name='fb_images'
+    )
+
+    class Meta:
+        unique_together = ('company', 'image_hash')

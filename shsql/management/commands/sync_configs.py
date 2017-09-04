@@ -8,10 +8,12 @@ from shsql.models import ReportConfig
 from shsql.models import DashboardConfig
 from shsql.models import ChartConfig
 from shsql.models import TableConfig
+from shsql.models import FacebookAdSetConfig
 from shsql.management.data.report_configs import facebook_report_configs
 from shsql.management.data.dashboard_configs import dashboard_configs
 from shsql.management.data.chart_configs import chart_configs
 from shsql.management.data.table_configs import table_configs
+from shsql.management.data.adset_configs import adset_configs
 
 def kwargs_from_fields(config, fields):
     return {f: config[f] for f in fields}
@@ -52,4 +54,10 @@ class Command(BaseCommand):
             table_configs,
             ['name', 'dashboard'],
             TableConfig
+        )
+
+        update_configs(
+            adset_configs,
+            ['platform', 'objective', 'geo'],
+            FacebookAdSetConfig
         )
