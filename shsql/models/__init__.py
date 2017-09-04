@@ -12,3 +12,5 @@ from .configs import KPIReportConfig
 from .configs import DashboardConfig
 from .configs import ChartConfig
 from .configs import TableConfig
+from .kpi import KPIDashboardReport
+from .kpi import KPIBinnedDashboardReport
