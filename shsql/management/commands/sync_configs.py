@@ -4,11 +4,13 @@ import uuid
 from django.core.management.base import BaseCommand
 
 from shsql.models import Company
-from shsql.models import ReportConfig
+from shsql.models import FacebookReportConfig
+from shsql.models import KPIReportConfig
 from shsql.models import DashboardConfig
 from shsql.models import ChartConfig
 from shsql.models import TableConfig
 from shsql.models import FacebookAdSetConfig
+from shsql.management.data.report_configs import kpi_report_configs
 from shsql.management.data.report_configs import facebook_report_configs
 from shsql.management.data.dashboard_configs import dashboard_configs
 from shsql.management.data.chart_configs import chart_configs
@@ -35,7 +37,13 @@ class Command(BaseCommand):
         update_configs(
             facebook_report_configs,
             ['platform', 'level', 'period', 'breakdown'],
-            ReportConfig
+            FacebookReportConfig
+        )
+
+        update_configs(
+            kpi_report_configs,
+            ['name'],
+            KPIReportConfig
         )
 
         update_configs(

@@ -203,3 +203,16 @@ facebook_report_configs = [{
         'actions_map': web_actions_map
     }
 }]
+
+kpi_report_configs = [{
+    "company": None,
+    "name": "kpi_cohort_bucket_reports",
+    "config": {
+        "params": [
+            {"name":"D0-7", "lo" : 0, "hi" : 7},
+            {"name":"D8-15", "lo" : 8, "hi" : 15},
+            {"name":"D16-30", "lo" : 16, "hi" : 30},
+            {"name":"D30+", "lo" : 30, "hi" : 30000}
+        ]
+    }
+}]

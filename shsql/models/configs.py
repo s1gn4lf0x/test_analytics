@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import JSONField
 
 from .user import Company
 
-class ReportConfig(models.Model):
+class FacebookReportConfig(models.Model):
     """Table to store report mapping configs.
     These configs are used for pulling reports (which fields etc)
     and for analysis of raw report data, column name mapping etc.
@@ -22,6 +22,21 @@ class ReportConfig(models.Model):
 
     class Meta:
         unique_together = ('platform', 'level', 'breakdown', 'period', 'company')
+
+class KPIReportConfig(models.Model):
+    """Table to store KPI report mapping configs."""
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='kpiconfigs',
+        null=True
+    )
+    name = models.CharField(max_length=128)
+    config = JSONField()
+
+    class Meta:
+        unique_together = ('name', 'company')
 
 class DashboardConfig(models.Model):
     """The dashboard configs table"""

@@ -7,7 +7,8 @@ from .fb import FacebookDashboardReport
 from .fb import FacebookAdSetConfig
 from .fb import FacebookImage
 from .fb import FacebookImageCreative
-from .reports import ReportConfig
-from .reports import DashboardConfig
-from .reports import ChartConfig
-from .reports import TableConfig
+from .configs import FacebookReportConfig
+from .configs import KPIReportConfig
+from .configs import DashboardConfig
+from .configs import ChartConfig
+from .configs import TableConfig

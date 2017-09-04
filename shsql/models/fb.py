@@ -4,7 +4,7 @@ from facebookads.adobjects.campaign import Campaign
 from fernet_fields import EncryptedCharField
 
 from .user import Company
-from .reports import ReportConfig
+from .configs import FacebookReportConfig
 
 class FacebookApp(models.Model):
     """The Facebook app auth information
@@ -62,7 +62,7 @@ class FacebookRawReport(models.Model):
         related_name='fbrawreports'
     )
     config = models.ForeignKey(
-        ReportConfig,
+        FacebookReportConfig,
         on_delete=models.PROTECT,
         related_name='fbrawreports'
     )
