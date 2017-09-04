@@ -7,10 +7,10 @@ from facebookads.api import FacebookAdsApi
 from facebookads.adobjects.adaccount import AdAccount
 
 from shsql.models import FacebookRawReport
+from util.dates import create_report_date
 
 from .util import result_key
 from .util import report_config
-from .util import create_report_date
 from .report_manager import ReportManager
 
 

@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'util',
     'shsql.apps.ShSQLConfig',
+    'kpi.apps.KPIConfig',
     'facebook.apps.FacebookConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -133,6 +134,21 @@ CELERY_TIMEZONE = 'UTC'
 from .celery_schedule import configure_celery_tasks
 CELERY_BEAT_SCHEDULE = configure_celery_tasks()
 
+REDSHIFT_PATH = '{}/redshift.json'.format(BASE_DIR)
+with open(REDSHIFT_PATH, 'r') as f:
+    redshift_settings = json.load(f)
+    redshift_credentials = redshift_settings['credentials']
+
+REDSHIFT_CLUSTER_JDBCURL = redshift_settings['ClusterJDBCURL']
+REDSHIFT_ROLE_ARN = redshift_settings['RoleARN']
+REDSHIFT_BUCKET_ARN = redshift_settings['BucketARN']
+
+REDSHIFT_SCHEMA = 'sfox_dev'
+REDSHIFT_HOSTNAME = redshift_credentials['host']
+REDSHIFT_PORT = redshift_credentials['port']
+REDSHIFT_USERNAME = redshift_credentials['user']
+REDSHIFT_PASSWORD = redshift_credentials['password']
+REDSHIFT_DB_NAME = redshift_credentials['dbname']
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/

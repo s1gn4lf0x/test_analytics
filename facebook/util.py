@@ -9,16 +9,11 @@ from django.utils import timezone
 from util.fernet import FernetHelper
 from util.row import Row
 from shsql.models import FacebookAdAccount
-from shsql.models import ReportConfig
+from shsql.models import FacebookReportConfig
 from shsql.models import DashboardConfig
 
 
 # ------- Shared helper functions (non-task functions) ------- #
-
-def create_report_date(offset):
-    local_date = timezone.localtime() - timedelta(days=offset)
-    return Delorean(local_date).truncate('day').datetime
-
 def fetch_active_accounts():
     return FacebookAdAccount.objects.filter(is_active__exact=True)
 
@@ -43,7 +38,7 @@ def report_config(level, platform, breakdown, company, period):
     If there is no company specific config, use the generic one.
     """
 
-    report_config = ReportConfig.objects.filter(
+    report_config = FacebookReportConfig.objects.filter(
         level=level,
         platform=platform.lower(),
         breakdown=breakdown,
@@ -53,7 +48,7 @@ def report_config(level, platform, breakdown, company, period):
     if report_config.exists():
         return report_config.get()
     else:
-        return ReportConfig.objects.filter(
+        return FacebookReportConfig.objects.filter(
             level=level,
             platform=platform.lower(),
             breakdown=breakdown,
