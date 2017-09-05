@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github-signalfox:SignalFoxAnalytics/shsql.git
 	branch = master
-	commit = 6d03c079c402263970024ab35851abc778b4d100
-	parent = 4761237fcdf457957417685d4d7826e1e27bdf99
+	commit = 71203dc50c32d19774ea72d30de06924efc5d2b0
+	parent = df3ff488469608d3878bd8421a7ed11dbf6988cf
 	cmdver = 0.3.1
