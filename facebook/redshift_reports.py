@@ -58,7 +58,7 @@ def send_to_endpoint(accounts, level, platform, breakdown, period, url, day=1):
     result = []
     for acc in accounts:
         # Debug logging
-        logger.debug(
+        logger.info(
             'Company {}, Account {}'.format(
                 acc.app.company.id,
                 acc.account_id

@@ -14,15 +14,41 @@ fb_task_map = {
     'fb-raw-reports': {
         'task': 'facebook.tasks.facebook_raw_reports',
         'hour': 19,
-        'minute': 38,
+        'minute': 10,
         'extra_args': []
     },
     'fb-dashboard-reports': {
         'task': 'facebook.tasks.facebook_dashboard_reports',
         'hour': 19,
-        'minute': 41,
+        'minute': 12,
+        'extra_args': []
+    },
+    'fb-to-redshift-reports': {
+        'task': 'facebook.tasks.facebook_reports_to_redshift',
+        'hour': 19,
+        'minute': 37,
         'extra_args': []
     }
+}
+
+# Period and offset
+kpi_reports = [
+    [1, 1,]
+]
+
+kpi_task_map = {
+    'kpi-binned-reports': {
+        'task': 'kpi.tasks.kpi_binned_reports',
+        'hour': 20,
+        'minute': 35,
+        'extra_args': []
+    },
+    'kpi-binned-reports': {
+        'task': 'kpi.tasks.kpi_reports',
+        'hour': 20,
+        'minute': 39,
+        'extra_args': []
+    },
 }
 
 def configure_celery_tasks():
@@ -39,5 +65,18 @@ def configure_celery_tasks():
                     minute=next_time[1]
                 ),
                 'args': r + fb_task_map[task]['extra_args']
+            }
+    for task in kpi_task_map:
+        for i, r in enumerate(kpi_reports):
+            hr = kpi_task_map[task]['hour']
+            mn = kpi_task_map[task]['minute']
+            next_time = divmod(kpi_task_map[task]['minute']+i*2, 60)
+            celery_tasks[task+'-'+'-'.join([str(a) for a in r if a != ''])] = {
+                'task': kpi_task_map[task]['task'],
+                'schedule': crontab(
+                    hour=kpi_task_map[task]['hour']+next_time[0],
+                    minute=next_time[1]
+                ),
+                'args': r + kpi_task_map[task]['extra_args']
             }
     return celery_tasks
