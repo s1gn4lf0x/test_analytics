@@ -143,7 +143,7 @@ REDSHIFT_CLUSTER_JDBCURL = redshift_settings['ClusterJDBCURL']
 REDSHIFT_ROLE_ARN = redshift_settings['RoleARN']
 REDSHIFT_BUCKET_ARN = redshift_settings['BucketARN']
 
-REDSHIFT_SCHEMA = 'sfox_dev'
+REDSHIFT_SCHEMA = 'sfox_prod'
 REDSHIFT_HOSTNAME = redshift_credentials['host']
 REDSHIFT_PORT = redshift_credentials['port']
 REDSHIFT_USERNAME = redshift_credentials['user']
@@ -162,6 +162,26 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        'signalfox.views': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)

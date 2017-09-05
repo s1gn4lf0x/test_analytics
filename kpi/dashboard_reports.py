@@ -1,5 +1,15 @@
+import logging
+
 from shsql.models import KPIDashboardReport
 from shsql.models import Company
+
+from .util import get_table_counts
+from .util import get_retention_counts
+from .util import get_roas_buckets
+from .util import to_float_local
+from .util import safe_divide
+
+logger = logging.getLogger('django')
 
 # Table counts query fields:
 # field, table, agg1, agg2, target_field
@@ -17,31 +27,28 @@ query_fields = {
     'fqt': ['freq_tertiary','eng_freq_3','count','distinct','id']
 }
 
-def count_dict(offset1, offset2, fields):
-    table_args = [rs, offset1, offset2, *fields]
-    return get_table_counts(*table_args)
-
-def retention_dict(offset, is_payer=False):
-    name = 'retention_d{}'.format(offset)
-    if is_payer:
-        name = 'payer_'+name
-    retention_args = [rs, report_date, offset, company_id, name, is_payer]
-    return get_retention_counts(*retention_args)
-
-def safe_divide(a, b):
-    return a/b if b != 0 else 0
-
-def to_float_local(d, key):
-    if d and key in d:
-        if d[key]:
-            return float(d[key])
-    return 0
-
-def kpi_daily_reports_batch(company_id, rs, report_date, period):
+def kpi_reports_batch(company_id, rs, report_date, period):
     """ Executes numerous queries to compute KPIs per active account.
     KPIs include daily total revenue, dau, dpu and arpu
     Store the raw report data in DynamoDB for later processing.
     """
+
+    def count_dict(offset1, offset2, fields):
+        table_args = [rs, offset1, offset2, company_id, *fields]
+        return get_table_counts(*table_args)
+
+    def retention_dict(offset, is_payer=False):
+        name = 'retention_d{}'.format(offset)
+        if is_payer:
+            name = 'payer_'+name
+        retention_args = [rs, report_date, offset, company_id, name, is_payer]
+        return get_retention_counts(*retention_args)
+
+    try:
+        company = Company.objects.get(id=company_id)
+    except Company.DoesNotExist as e:
+        logger.info(str(e))
+        return {company_id: 'Not found'}
 
     rev_dict = count_dict(1, 0, query_fields['rev'])
     dau_dict = count_dict(1, 0, query_fields['dau'])
@@ -73,12 +80,12 @@ def kpi_daily_reports_batch(company_id, rs, report_date, period):
     roas_bin_d60_dict = get_roas_buckets(rs, 'roas_d', 60, company_id)
 
     data = {
-        'labels' : [dt.strftime("%Y-%m-%d")],
+        'labels' : [report_date.strftime("%Y-%m-%d")],
         'revenue' : [to_float_local(rev_dict,'revenue')],
         'dau' : [to_float_local(dau_dict,'dau')],
         'dpu' : [to_float_local(dpu_dict,'dpu')],
         'arpu' : [safe_divide(
-            to_float_local(revenue_dict,'revenue'),
+            to_float_local(rev_dict,'revenue'),
             to_float_local(dau_dict,'dau')
         )],
         'wau' : [to_float_local(wau_dict,'wau')],
@@ -106,8 +113,8 @@ def kpi_daily_reports_batch(company_id, rs, report_date, period):
         'roas_d60' : [to_float_local(roas_bin_d1_dict, 'spend')]
     }
 
-    (report, created) = KPIDailyDashboardReport.objects.update_or_create(
-        company=Company.get(id=company_id),
+    (report, created) = KPIDashboardReport.objects.update_or_create(
+        company=company,
         report_date=report_date,
         period=period,
         defaults={'data': data}

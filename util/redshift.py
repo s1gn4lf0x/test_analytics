@@ -4,8 +4,6 @@ import psycopg2
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from rest_framework.serializers import CharField
-
 class RedshiftHelper:
     """A class to handle Redshift queries and interactions"""
 

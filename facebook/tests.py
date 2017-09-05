@@ -3,6 +3,7 @@ import json
 import uuid
 
 from django.test import TestCase
+from django.core import management
 
 from shsql.models import Company
 from shsql.models import ReportConfig
@@ -12,42 +13,13 @@ from shsql.models import FacebookAdAccount
 from shsql.models import FacebookRawReport
 from shsql.models import FacebookDashboardReport
 
-from shsql.management.data.dashboard_configs import dashboard_configs
-from shsql.management.data.report_configs import facebook_report_configs
-
 from .tasks import facebook_raw_reports
 from .tasks import facebook_dashboard_reports
 
-class RawReportsTest(TestCase):
+class FacebookReportsTest(TestCase):
     def setUp(self):
         # Create the report configs to use
-        for config in facebook_report_configs:
-            kwargs = {
-                'platform': config['platform'],
-                'level': config['level'],
-                'period': config['period'],
-                'breakdown': config['breakdown']
-            }
-            if config['company']:
-                kwargs['company'] = Company.get(id=config['company'])
-
-            (report, created) = ReportConfig.objects.update_or_create(
-                defaults = config,
-                **kwargs
-            )
-
-        for config in dashboard_configs:
-            kwargs = {
-                'platform': config['platform'],
-                'dashboard': config['dashboard'],
-            }
-            if config['company']:
-                kwargs['company'] = Company.get(id=config['company'])
-
-            DashboardConfig.objects.update_or_create(
-                defaults = config,
-                **kwargs
-            )
+        management.call_command('sync_configs')
 
         # Create the app and accounts to test
         test_api_id = uuid.uuid4()

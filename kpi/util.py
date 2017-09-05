@@ -1,4 +1,5 @@
 import json
+import logging
 
 from decimal import Decimal
 from django.conf import settings
@@ -8,6 +9,8 @@ from shsql.models import KPIReportConfig
 
 KPI_COHORT_BUCKET_REPORTS_KEY = 'kpi_cohort_bucket_reports'
 DEFAULT = 'default'
+
+logger = logging.getLogger('django')
 
 def fetch_active_companies(rs):
     """ Gets active companies from Redshift by doing
@@ -35,6 +38,15 @@ def report_config(company, name):
             name=name
         ).get()
 
+def safe_divide(a, b):
+    return a/b if b != 0 else 0
+
+def to_float_local(d, key):
+    if d and key in d:
+        if d[key]:
+            return float(d[key])
+    return 0
+
 def json_from_record(record):
     return json.loads(json.dumps(dict(record), default=default_converter))
 
@@ -57,10 +69,9 @@ def generate_kpi_bucket_query(params, company_id, report_date):
         from (
     """
 
-    for p in range(len(params)):
+    for p, param in enumerate(params):
         if p > 0:
-            sql += " union all "
-        param = params[p]
+            query += " union all "
 
         query += """
             select i.company_id, '{bucket}' as bin,
@@ -166,7 +177,7 @@ def get_retention_counts(
             )
         """.format(
             company_id=company_id,
-            schema=redshift_schema()
+            schema=settings.REDSHIFT_SCHEMA
         )
     logger.debug(query)
 
