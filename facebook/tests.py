@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.core import management
 
 from shsql.models import Company
-from shsql.models import ReportConfig
+from shsql.models import FacebookReportConfig
 from shsql.models import DashboardConfig
 from shsql.models import FacebookApp
 from shsql.models import FacebookAdAccount
@@ -15,6 +15,7 @@ from shsql.models import FacebookDashboardReport
 
 from .tasks import facebook_raw_reports
 from .tasks import facebook_dashboard_reports
+from .tasks import facebook_reports_to_redshift
 
 class FacebookReportsTest(TestCase):
     def setUp(self):
@@ -136,3 +137,21 @@ class FacebookReportsTest(TestCase):
             self.assertEqual(r.raw_report.config.platform, 'web')
             self.assertTrue('spend' in r.data)
             self.assertTrue('labels' in r.data)
+
+    def test_facebook_reports_to_redshift(self):
+        """We can send raw facebook data to reshift tables"""
+        result = facebook_reports_to_redshift('account', 'web', '', 1)
+        for name in result:
+            for item in result[name]:
+                for acc in item:
+                    self.assertEqual(item[acc], 200)
+        result = facebook_reports_to_redshift('account', 'web', 'geo', 1)
+        for name in result:
+            for item in result[name]:
+                for acc in item:
+                    self.assertEqual(item[acc], 200)
+        result = facebook_reports_to_redshift('adset', 'web', '', 1)
+        for name in result:
+            for item in result[name]:
+                for acc in item:
+                    self.assertEqual(item[acc], 200)

@@ -1,6 +1,7 @@
 import os
 import boto3
 import json
+import logging
 
 from django.db import IntegrityError, transaction
 from facebookads.api import FacebookAdsApi
@@ -13,6 +14,7 @@ from .util import result_key
 from .util import report_config
 from .report_manager import ReportManager
 
+logger = logging.getLogger('django')
 
 def facebook_raw_reports_batch(accounts, level, platform, breakdown, period, day=1):
     """Create a batch of daily raw reports"""
@@ -37,7 +39,12 @@ def facebook_raw_reports_batch(accounts, level, platform, breakdown, period, day
                     period
                 )
                 report_date = create_report_date(day)
-                print(report_date)
+                logger.info('raw report {} {} {} {}'.format(
+                    platform,
+                    level,
+                    breakdown,
+                    report_date)
+                )
                 report_date_str = report_date.strftime('%Y-%m-%d')
                 setup.config['params']['time_range'] = {
                     'since': report_date_str,

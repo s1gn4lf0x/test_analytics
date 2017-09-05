@@ -29,6 +29,25 @@ def fetch_test_accounts():
             rows = [Row(cols, row) for row in raw_rows]
             return rows
 
+def construct_to_redshift_url(level, breakdown, period):
+    level_map = {
+        'account': '',
+        'campaigns': 'campaign',
+        'adset': 'adsets'
+    }
+    breakdown_map = {
+        'geo': 'country',
+        'region': 'region'
+    }
+    url = '/api/fb_raw_reports'
+    if level_map[level]:
+        url += '_{}'.format(level_map[level])
+    if breakdown:
+        url += '_{}'.format(breakdown_map[breakdown])
+    url += '/'
+
+    return url
+
 def result_key(acc):
     """Key to save the report result under."""
     return '{}_{}'.format(acc.company_id,acc.account_id)

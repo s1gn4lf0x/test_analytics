@@ -30,6 +30,6 @@ test_*.json
 **/management/commands/test_*.py
 
 # Local files
-local_db.json
+*.json
 **/qunit/signalfox.js
 celerybeat-schedule

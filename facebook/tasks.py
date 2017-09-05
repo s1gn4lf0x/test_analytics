@@ -1,12 +1,15 @@
 from celery import shared_task
 
 from .util import fetch_active_accounts
+from .util import construct_to_redshift_url
 
 from .raw_reports import facebook_raw_reports_batch
 from .raw_reports import facebook_backdate_raw_reports_batch
 
 from .dashboard_reports import facebook_dashboard_reports_batch
 from .dashboard_reports import facebook_backdate_dashboard_reports_batch
+
+from .redshift_reports import send_to_endpoint
 
 @shared_task
 def facebook_raw_reports(level, platform, breakdown, period):
@@ -25,7 +28,14 @@ def facebook_raw_reports(level, platform, breakdown, period):
         breakdown,
         period
     )
-    return { 'fb_raw_report_{}_{}_{}_d{}'.format(level, platform, breakdown, period): result }
+    return {
+        'fb_raw_report_{}_{}_{}_d{}'.format(
+            level,
+            platform,
+            breakdown,
+            period
+        ): result
+    }
 
 @shared_task
 def facebook_backdate_raw_reports(
@@ -53,7 +63,14 @@ def facebook_backdate_raw_reports(
         days,
         offset
     )
-    return { 'fb_backdate_raw_report_{}_{}_{}_d{}'.format(level, platform, breakdown, period): result }
+    return {
+        'fb_backdate_raw_report_{}_{}_{}_d{}'.format(
+            level,
+            platform,
+            breakdown,
+            period
+        ): result
+    }
 
 @shared_task
 def facebook_dashboard_reports(level, platform, breakdown, period):
@@ -70,7 +87,14 @@ def facebook_dashboard_reports(level, platform, breakdown, period):
         breakdown,
         period
     )
-    return { 'fb_dash_report_{}_{}_{}_d{}'.format(level, platform, breakdown, period): result }
+    return {
+        'fb_dash_report_{}_{}_{}_d{}'.format(
+            level,
+            platform,
+            breakdown,
+            period
+        ): result
+    }
 
 @shared_task
 def facebook_backdate_dashboard_reports(
@@ -96,4 +120,33 @@ def facebook_backdate_dashboard_reports(
         days,
         offset
     )
-    return { 'fb_backdate_dash_report_{}_{}_{}_d{}'.format(level, platform, breakdown, period): result }
+    return {
+        'fb_backdate_dash_report_{}_{}_{}_d{}'.format(
+            level,
+            platform,
+            breakdown,
+            period):
+        result
+    }
+
+@shared_task
+def facebook_reports_to_redshift(level, platform, breakdown, period):
+    accounts = fetch_active_accounts()
+    url = construct_to_redshift_url(level, breakdown, period)
+    result = send_to_endpoint(
+        accounts,
+        level,
+        platform,
+        breakdown,
+        period,
+        url,
+        day=1
+    )
+    return {
+        'to_redshift_{}_{}_{}_{}'.format(
+            level,
+            platform,
+            breakdown,
+            period
+        ): result
+    }

@@ -143,12 +143,29 @@ REDSHIFT_CLUSTER_JDBCURL = redshift_settings['ClusterJDBCURL']
 REDSHIFT_ROLE_ARN = redshift_settings['RoleARN']
 REDSHIFT_BUCKET_ARN = redshift_settings['BucketARN']
 
-REDSHIFT_SCHEMA = 'sfox_prod'
+REDSHIFT_SCHEMA = 'sfox_dev'
 REDSHIFT_HOSTNAME = redshift_credentials['host']
 REDSHIFT_PORT = redshift_credentials['port']
 REDSHIFT_USERNAME = redshift_credentials['user']
 REDSHIFT_PASSWORD = redshift_credentials['password']
 REDSHIFT_DB_NAME = redshift_credentials['dbname']
+
+REDSHIFT_API_HOST_URL="https://dev.api.signalfox.com"
+
+iu_file_local = '{}/internal_api_user_dev.json'.format(BASE_DIR)
+
+iu_config = {}
+if os.path.isfile(iu_file_local):
+    print('Using INTERNAL USER settings from {}\n'.format(iu_file_local))
+    with open(iu_file_local) as f:
+        iu_config = json.load(f)
+
+INTERNAL_USER = {}
+if(iu_config):
+    INTERNAL_USER = {
+            'INTERNAL_API_USER_ID': iu_config['INTERNAL_API_USER_ID'],
+            'INTERNAL_API_USER_SECRET': iu_config['INTERNAL_API_USER_SECRET'],
+        }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
